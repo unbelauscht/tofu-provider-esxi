@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	esxiHostName    string
-	esxiHostSSHport string
-	esxiHostSSLport string
-	esxiUserName    string
-	esxiPassword    string
+	esxiHostName       string
+	esxiHostSSHport    string
+	esxiHostSSLport    string
+	esxiUserName       string
+	esxiPassword       string
 	esxiPrivateKeyPath string
 }
 
@@ -21,10 +21,10 @@ func (c *Config) validateEsxiCreds() error {
 	var remote_cmd string
 	var err error
 
-	remote_cmd = fmt.Sprintf("vmware --version")
+	remote_cmd = "vmware --version"
 	_, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "Connectivity test, get vmware version")
 	if err != nil {
-		return fmt.Errorf("Failed to connect to esxi host: %s\n", err)
+		return fmt.Errorf("failed to connect to esxi host: %s", err)
 	}
 
 	runRemoteSshCommand(esxiConnInfo, "mkdir -p ~", "Create home directory if missing")

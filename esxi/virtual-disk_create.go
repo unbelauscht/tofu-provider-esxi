@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"time"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -21,8 +21,6 @@ func resourceVIRTUALDISKCreate(d *schema.ResourceData, m interface{}) error {
 	virtual_disk_type := d.Get("virtual_disk_type").(string)
 
 	if virtual_disk_name == "" {
-		rand.Seed(time.Now().UnixNano())
-
 		const digits = "0123456789ABCDEF"
 		name := make([]byte, 10)
 		for i := range name {
@@ -37,7 +35,12 @@ func resourceVIRTUALDISKCreate(d *schema.ResourceData, m interface{}) error {
 	//
 
 	// todo,  check invalid chars (quotes, slash, period, comma)
-	// todo,  must end with .vmdk
+
+	if !strings.HasSuffix(virtual_disk_name, ".vmdk") {
+		return fmt.Errorf("Disk does not have '.vmdk' suffix.")
+	}
+
+	// Create virtual disk
 
 	virtdisk_id, err := virtualDiskCREATE(c, virtual_disk_disk_store, virtual_disk_dir,
 		virtual_disk_name, virtual_disk_size, virtual_disk_type)

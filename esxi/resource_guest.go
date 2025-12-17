@@ -309,12 +309,12 @@ func resourceGUESTCreate(d *schema.ResourceData, m interface{}) error {
 
 	supportedVirtHwVer := []string{"4", "7", "8", "9", "10", "11", "12", "13", "14"}
 	if !slices.Contains(supportedVirtHwVer, virthwver) {
-		return fmt.Errorf("Error: virthwver must be in %+v: got %s", supportedVirtHwVer, virthwver)
+		return fmt.Errorf("error: virthwver must be in %+v: got %s", supportedVirtHwVer, virthwver)
 	}
 
 	//  Validate guestos
-	if validateGuestOsType(guestos) == false {
-		return errors.New("Error: invalid guestos.  see https://github.com/josenk/vagrant-vmware-esxi/wiki/VMware-ESXi-6.5-guestOS-types")
+	if !validateGuestOsType(guestos) {
+		return errors.New("error: invalid guestos. see https://github.com/josenk/vagrant-vmware-esxi/wiki/VMware-ESXi-6.5-guestOS-types")
 	}
 
 	// Validate boot_disk_type

@@ -8,9 +8,7 @@ import (
 	"strings"
 )
 
-//
-//  Validate Disk Store
-//
+// Validate Disk Store
 func diskStoreValidate(c *Config, disk_store string) error {
 	esxiConnInfo := getConnectionInfo(c)
 	log.Printf("[diskStoreValidate]\n")
@@ -46,9 +44,7 @@ func diskStoreValidate(c *Config, disk_store string) error {
 	return nil
 }
 
-//
-//  Create virtual disk
-//
+// Create virtual disk
 func virtualDiskCREATE(c *Config, virtual_disk_disk_store string, virtual_disk_dir string,
 	virtual_disk_name string, virtual_disk_size int, virtual_disk_type string) (string, error) {
 	esxiConnInfo := getConnectionInfo(c)
@@ -102,9 +98,7 @@ func virtualDiskCREATE(c *Config, virtual_disk_disk_store string, virtual_disk_d
 	return virtdisk_id, err
 }
 
-//
-//  Grow virtual Disk
-//
+// Grow virtual Disk
 func growVirtualDisk(c *Config, virtdisk_id string, virtdisk_size string) (bool, error) {
 	esxiConnInfo := getConnectionInfo(c)
 	log.Printf("[growVirtualDisk]\n")
@@ -130,9 +124,7 @@ func growVirtualDisk(c *Config, virtdisk_id string, virtdisk_size string) (bool,
 	return didGrowDisk, err
 }
 
-//
-//  Read virtual Disk details
-//
+// Read virtual Disk details
 func virtualDiskREAD(c *Config, virtdisk_id string) (string, string, string, int, string, error) {
 	esxiConnInfo := getConnectionInfo(c)
 	log.Println("[virtualDiskREAD] Begin")

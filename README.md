@@ -10,7 +10,7 @@ Requirements
 ------------
 -   [Terraform](https://www.terraform.io/downloads.html) 0.11.x+
 -   [Go](https://golang.org/doc/install) 1.11+ (to build the provider plugin)
--   [ovftool](https://www.vmware.com/support/developer/ovf/) from VMware.  NOTE: ovftool installer for windows doesn't put ovftool.exe in your path.  You will need to manually set your path.
+-   [ovftool](https://developer.broadcom.com/tools/open-virtualization-format-ovf-tool/latest) from VMware.  NOTE: ovftool installer for windows doesn't put ovftool.exe in your path.  You will need to manually set your path.
 -   You MUST enable ssh access on your ESXi hypervisor.
   * Google 'How to enable ssh access on esxi'
 -   In general, you should know how to use terraform, esxi and some networking...

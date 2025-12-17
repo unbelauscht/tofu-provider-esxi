@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"slices"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -305,6 +306,11 @@ func resourceGUESTCreate(d *schema.ResourceData, m interface{}) error {
 	//default:
 	//  return errors.New("Error: virthwver must be 4,7,8,9,10,11,12,13 or 14")
 	//}
+
+	supportedVirtHwVer := []string{"4", "7", "8", "9", "10", "11", "12", "13", "14"}
+	if !slices.Contains(supportedVirtHwVer, virthwver) {
+		return fmt.Errorf("Error: virthwver must be in %+v: got %s", supportedVirtHwVer, virthwver)
+	}
 
 	//  Validate guestos
 	if validateGuestOsType(guestos) == false {

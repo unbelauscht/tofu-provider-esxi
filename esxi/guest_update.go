@@ -22,7 +22,7 @@ func resourceGUESTUpdate(d *schema.ResourceData, m interface{}) error {
 	vmid := d.Id()
 	memsize := d.Get("memsize").(string)
 	numvcpus := d.Get("numvcpus").(string)
-	boot_disk_size := d.Get("boot_disk_size").(string)
+	boot_disk_size := d.Get("boot_disk_size").(int)
 	virthwver := d.Get("virthwver").(string)
 	guestos := d.Get("guestos").(string)
 	guest_shutdown_timeout := d.Get("guest_shutdown_timeout").(int)
@@ -60,8 +60,8 @@ func resourceGUESTUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Validate guestOS
-	if validateGuestOsType(guestos) == false {
-		return errors.New("Error: invalid guestos.  see https://github.com/josenk/vagrant-vmware-esxi/wiki/VMware-ESXi-6.5-guestOS-types")
+	if !validateGuestOsType(guestos) {
+		return errors.New("error: invalid guestos, see https://github.com/josenk/vagrant-vmware-esxi/wiki/VMware-ESXi-6.5-guestOS-types")
 	}
 
 	for i = 0; i < virtualDiskCount; i++ {
@@ -84,7 +84,7 @@ func resourceGUESTUpdate(d *schema.ResourceData, m interface{}) error {
 	if currentpowerstate == "on" || currentpowerstate == "suspended" {
 		_, err = guestPowerOff(c, vmid, guest_shutdown_timeout)
 		if err != nil {
-			return fmt.Errorf("Failed to power off: %s\n", err)
+			return fmt.Errorf("failed to power off: %s", err)
 		}
 	}
 
@@ -97,7 +97,7 @@ func resourceGUESTUpdate(d *schema.ResourceData, m interface{}) error {
 	err = updateVmx_contents(c, vmid, false, imemsize, inumvcpus, ivirthwver, guestos, virtual_networks, boot_firmware, virtual_disks, notes, guestinfo)
 	if err != nil {
 		fmt.Println("Failed to update vmx file.")
-		return fmt.Errorf("Failed to update vmx file: %s\n", err)
+		return fmt.Errorf("failed to update vmx file: %s", err)
 	}
 
 	//
@@ -107,11 +107,14 @@ func resourceGUESTUpdate(d *schema.ResourceData, m interface{}) error {
 
 	did_grow, err = growVirtualDisk(c, boot_disk_vmdkPATH, boot_disk_size)
 	if err != nil {
-		return fmt.Errorf("Failed to grow virtual disk: %s\n", err)
+		return fmt.Errorf("failed to grow virtual disk: %s", err)
 	}
 
 	if did_grow {
 		err = guestReload(c, vmid)
+		if err != nil {
+			return err
+		}
 	}
 
 	//  power on
@@ -119,7 +122,7 @@ func resourceGUESTUpdate(d *schema.ResourceData, m interface{}) error {
 		_, err = guestPowerOn(c, vmid)
 		if err != nil {
 			fmt.Println("Failed to power on.")
-			return fmt.Errorf("Failed to power on: %s\n", err)
+			return fmt.Errorf("failed to power on: %s", err)
 		}
 	}
 

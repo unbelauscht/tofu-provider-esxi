@@ -251,7 +251,7 @@ func resourceGUESTCreate(d *schema.ResourceData, m interface{}) error {
 	resource_pool_name := d.Get("resource_pool_name").(string)
 	guest_name := d.Get("guest_name").(string)
 	boot_disk_type := d.Get("boot_disk_type").(string)
-	boot_disk_size := d.Get("boot_disk_size").(string)
+	boot_disk_size := d.Get("boot_disk_size").(int)
 	memsize := d.Get("memsize").(string)
 	numvcpus := d.Get("numvcpus").(string)
 	virthwver := d.Get("virthwver").(string)
@@ -322,16 +322,12 @@ func resourceGUESTCreate(d *schema.ResourceData, m interface{}) error {
 		boot_disk_type = "thin"
 	}
 	if boot_disk_type != "thin" && boot_disk_type != "zeroedthick" && boot_disk_type != "eagerzeroedthick" {
-		return errors.New("Error: boot_disk_type must be thin, zeroedthick or eagerzeroedthick")
+		return errors.New("error: boot_disk_type must be thin, zeroedthick or eagerzeroedthick")
 	}
 
 	//  Validate boot_disk_size.
-	if _, err := strconv.Atoi(boot_disk_size); err != nil && boot_disk_size != "" {
-		return errors.New("Error: boot_disk_size must be an integer")
-	}
-	tmpint, _ = strconv.Atoi(boot_disk_size)
-	if (tmpint < 1 || tmpint > 62000) && boot_disk_size != "" {
-		return errors.New("Error: boot_disk_size must be an > 1 and < 62000")
+	if (boot_disk_size < 1 || boot_disk_size > 62000) && boot_disk_size != 0 {
+		return errors.New("error: boot_disk_size must be an > 1 and < 62000")
 	}
 
 	//  Validate lan adapters
@@ -353,7 +349,7 @@ func resourceGUESTCreate(d *schema.ResourceData, m interface{}) error {
 		if attr, ok := d.Get(prefix + "nic_type").(string); ok && attr != "" {
 			virtual_networks[i][2] = d.Get(prefix + "nic_type").(string)
 			//  Validate nictype
-			if validateNICType(virtual_networks[i][2]) == false {
+			if !validateNICType(virtual_networks[i][2]) {
 				errMSG := fmt.Sprintf("Error: invalid nic_type. %s\nMust be vlance flexible e1000 e1000e vmxnet vmxnet2 or vmxnet3", virtual_networks[i][2])
 				return errors.New(errMSG)
 			}
@@ -423,7 +419,7 @@ func resourceGUESTCreate(d *schema.ResourceData, m interface{}) error {
 	if power == "on" || power == "" {
 		_, err = guestPowerOn(c, vmid)
 		if err != nil {
-			return errors.New("Failed to power on.")
+			return errors.New("failed to power on.")
 		}
 	}
 	d.Set("power", "on")

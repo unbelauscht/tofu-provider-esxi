@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//  Check if Pool exists (by name )and return it's Pool ID.
+// Check if Pool exists (by name )and return it's Pool ID.
 func getPoolID(c *Config, resource_pool_name string) (string, error) {
 	esxiConnInfo := getConnectionInfo(c)
 	log.Printf("[getPoolID]\n")
@@ -33,7 +33,7 @@ func getPoolID(c *Config, resource_pool_name string) (string, error) {
 	}
 }
 
-//  Check if Pool exists (by id)and return it's Pool name.
+// Check if Pool exists (by id)and return it's Pool name.
 func getPoolNAME(c *Config, resource_pool_id string) (string, error) {
 	esxiConnInfo := getConnectionInfo(c)
 	log.Printf("[getPoolNAME]\n")

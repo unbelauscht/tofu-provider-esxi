@@ -26,7 +26,7 @@ You first must set your GOPATH.   If you are unsure, please review the documenta
 >https://github.com/golang/go/wiki/SettingGOPATH
 
 
-Clone repository to: `$GOPATH/src/github.com/josenk/terraform-provider-esxi`
+Clone repository to: `$GOPATH/src/github.com/unbelauscht/terraform-provider-esxi`
 
 ```sh
 
@@ -35,9 +35,9 @@ export GOPATH="$HOME/go"
 
 go get -u -v golang.org/x/crypto/ssh
 go get -u -v github.com/hashicorp/terraform
-go get -u -v github.com/josenk/terraform-provider-esxi
+go get -u -v github.com/unbelauscht/terraform-provider-esxi
 
-cd $GOPATH/src/github.com/josenk/terraform-provider-esxi
+cd $GOPATH/src/github.com/unbelauscht/terraform-provider-esxi
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-w -extldflags "-static"' -o terraform-provider-esxi_`cat version`
 
 sudo cp terraform-provider-esxi_`cat version` /usr/local/bin
@@ -61,7 +61,7 @@ What's New:
 * v1.9.0 Changed default hwversion from 8 to 13.  NOTE that this is a possible breaking change if you are using versions of ESXi older than 6.5.
 * v1.8.0 added vswitch and portgroup resources.
 * v1.7.1 added Terraform 0.13 support.  This provider is now in the terraform registry.
->https://registry.terraform.io/providers/josenk/esxi
+>https://registry.terraform.io/providers/unbelauscht/esxi
 
 
 Features and Compatibility
@@ -81,15 +81,15 @@ This is a provider!  NOT a provisioner.
 * To configure your guest VM after it's built, you need to use a provisioner.
   * Refer to Hashicorp list of provisioners: https://www.terraform.io/docs/provisioners/index.html
 * To help you get started, there is are examples in a separate repo I created.   You can create a Pull Request if you would like to contribute.
-  * https://github.com/josenk/terraform-provider-esxi-wiki
+  * https://github.com/unbelauscht/terraform-provider-esxi-wiki
 
 
 Vagrant vs Terraform.
 ---------------------
 If you are using vagrant as a deployment tool (infa as code), you may want to consider a better tool.  Terraform.  Vagrant is better for development environments, while Terraform is better at managing infrastructure.  Please give my terraform plugin a try and give me some feedback.  What you're trying to do, what's missing, what works, what doesn't work, etc...
 >https://www.vagrantup.com/intro/vs/terraform.html
->https://github.com/josenk/terraform-provider-esxi
->https://github.com/josenk/vagrant-vmware-esxi
+>https://github.com/unbelauscht/terraform-provider-esxi
+>https://github.com/unbelauscht/vagrant-vmware-esxi
 
 
 Why this plugin?
@@ -108,17 +108,17 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     esxi = {
-      source = "registry.terraform.io/josenk/esxi"
+      source = "registry.terraform.io/unbelauscht/esxi"
       #
       # For more information, see the provider source documentation:
-      # https://github.com/josenk/terraform-provider-esxi
-      # https://registry.terraform.io/providers/josenk/esxi
+      # https://github.com/unbelauscht/terraform-provider-esxi
+      # https://registry.terraform.io/providers/unbelauscht/esxi
     }
   }
 }
 ```
 * Manual installation (Terraform 0.11.x or 0.12.x only)
-  * Download pre-built binaries from https://github.com/josenk/terraform-provider-esxi/releases.  Place a copy of it in your path or current directory of your terraform project.
+  * Download pre-built binaries from https://github.com/unbelauscht/terraform-provider-esxi/releases.  Place a copy of it in your path or current directory of your terraform project.
 
 
 
@@ -272,12 +272,6 @@ Known issues with vmware_esxi
 * Doesn't support Shared bus Interfaces, or Shared disks
 * Using an incorrect password could lockout your account using default esxi pam settings.
 * Don't set guest_startup_timeout or guest_shutdown_timeout to 0 (zero).  It's valid, however it will be changed to default values by terraform.
-
-Donations
----------
-I work very hard to produce a stable, well documented product.  I appreciate any payments or donations for my efforts.
-* Bitcoin: 1Kt89337143SzLjSddkRDVEMBRUWoKQhqy
-* paypal:  josenk at jintegrate.co
 
 
 Version History

@@ -51,6 +51,27 @@ func resourceVIRTUALDISK() *schema.Resource {
 				DefaultFunc: schema.EnvDefaultFunc("virtual_disk_type", "thin"),
 				Description: "Virtual Disk type.  (thin, zeroedthick or eagerzeroedthick)",
 			},
+			"virtual_disk_clone_src_disk_store": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    false,
+				ForceNew:    true,
+				DefaultFunc: schema.EnvDefaultFunc("virtual_disk_clone_src_disk_store", ""),
+				Description: "Source disk store to clone image from.",
+			},
+			"virtual_disk_clone_src_dir": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    false,
+				ForceNew:    true,
+				DefaultFunc: schema.EnvDefaultFunc("virtual_disk_clone_src_dir", ""),
+				Description: "Source disk directory to clone image from.",
+			},
+			"virtual_disk_clone_src_name": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    false,
+				ForceNew:    true,
+				DefaultFunc: schema.EnvDefaultFunc("virtual_disk_clone_src_dir", ""),
+				Description: "Source disk name to clone.",
+			},
 		},
 	}
 }

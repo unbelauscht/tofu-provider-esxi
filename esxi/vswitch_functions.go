@@ -170,7 +170,7 @@ func vswitchRead(c *Config, name string) (int, int, []string, string, bool, bool
 		mac_changes, forged_transmits, nil
 }
 
-//  Python is better... :-)
+// Python is better... :-)
 func inArrayOfStrings(slice []string, val string) bool {
 	for _, item := range slice {
 		if item == val {

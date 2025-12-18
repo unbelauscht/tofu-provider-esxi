@@ -19,26 +19,26 @@ func diskStoreValidate(c *Config, disk_store string) error {
 	//
 	//  Check if Disk Store already exists
 	//
-	remote_cmd = fmt.Sprintf("esxcli storage filesystem list | grep '/vmfs/volumes/.*[VMFS|NFS]' |awk '{for(i=2;i<=NF-5;++i)printf $i\" \" ; printf \"\\n\"}'")
+	remote_cmd = "esxcli storage filesystem list | grep '/vmfs/volumes/.*[VMFS|NFS]' |awk '{for(i=2;i<=NF-5;++i)printf $i\" \" ; printf \"\\n\"}'"
 	stdout, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "Get list of disk stores")
 	if err != nil {
-		return fmt.Errorf("Unable to get list of disk stores: %s\n", err)
+		return fmt.Errorf("unable to get list of disk stores: %s", err)
 	}
 	log.Printf("1: Available Disk Stores: %s\n", strings.Replace(stdout, "\n", " ", -1))
 
-	if strings.Contains(stdout, disk_store) == false {
-		remote_cmd = fmt.Sprintf("esxcli storage filesystem rescan")
+	if !strings.Contains(stdout, disk_store) {
+		remote_cmd = "esxcli storage filesystem rescan"
 		_, _ = runRemoteSshCommand(esxiConnInfo, remote_cmd, "Refresh filesystems")
 
-		remote_cmd = fmt.Sprintf("esxcli storage filesystem list | grep '/vmfs/volumes/.*[VMFS|NFS]' |awk '{for(i=2;i<=NF-5;++i)printf $i\" \" ; printf \"\\n\"}'")
+		remote_cmd = "esxcli storage filesystem list | grep '/vmfs/volumes/.*[VMFS|NFS]' |awk '{for(i=2;i<=NF-5;++i)printf $i\" \" ; printf \"\\n\"}'"
 		stdout, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "Get list of disk stores")
 		if err != nil {
-			return fmt.Errorf("Unable to get list of disk stores: %s\n", err)
+			return fmt.Errorf("unable to get list of disk stores: %s", err)
 		}
 		log.Printf("2: Available Disk Stores: %s\n", strings.Replace(stdout, "\n", " ", -1))
 
-		if strings.Contains(stdout, disk_store) == false {
-			return fmt.Errorf("Disk Store %s does not exist.\nAvailable Disk Stores: %s\n", disk_store, stdout)
+		if !strings.Contains(stdout, disk_store) {
+			return fmt.Errorf("disk store %s does not exist, available disk stores: %s", disk_store, stdout)
 		}
 	}
 	return nil
@@ -58,7 +58,7 @@ func virtualDiskCREATE(c *Config, virtual_disk_disk_store string, virtual_disk_d
 	//
 	err = diskStoreValidate(c, virtual_disk_disk_store)
 	if err != nil {
-		return "", fmt.Errorf("Failed to validate disk store: %s\n", err)
+		return "", fmt.Errorf("failed to validate disk store: %s", err)
 	}
 
 	//
@@ -70,7 +70,7 @@ func virtualDiskCREATE(c *Config, virtual_disk_disk_store string, virtual_disk_d
 	remote_cmd = fmt.Sprintf("ls -d \"/vmfs/volumes/%s/%s\"", virtual_disk_disk_store, virtual_disk_dir)
 	_, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "validate dir exists")
 	if err != nil {
-		return "", fmt.Errorf("Failed to create virtual disk directory: %s\n", err)
+		return "", fmt.Errorf("failed to create virtual disk directory: %s", err)
 	}
 
 	//
@@ -92,23 +92,102 @@ func virtualDiskCREATE(c *Config, virtual_disk_disk_store string, virtual_disk_d
 		virtual_disk_type, virtdisk_id)
 	_, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "Create virtual_disk")
 	if err != nil {
-		return "", errors.New("Unable to create virtual_disk")
+		return "", errors.New("unable to create virtual_disk")
 	}
 
 	return virtdisk_id, err
 }
 
+// Create virtual disk
+func virtualDiskCLONE(
+	c *Config,
+	virtual_disk_disk_store string,
+	virtual_disk_dir string,
+	virtual_disk_name string,
+	virtual_disk_size int,
+	virtual_disk_type string,
+	virtual_disk_clone_src_disk_store string,
+	virtual_disk_clone_src_dir string,
+	virtual_disk_clone_src_name string,
+) (string, error) {
+	esxiConnInfo := getConnectionInfo(c)
+	log.Println("[virtualDiskCLONE]")
+
+	var (
+		virtdisk_dest_id      string
+		virtdisk_clone_src_id string
+		remote_cmd            string
+		err                   error
+	)
+
+	//
+	//  Validate disk store exists
+	//
+	err = diskStoreValidate(c, virtual_disk_disk_store)
+	if err != nil {
+		return "", fmt.Errorf("failed to validate disk store: %s", err)
+	}
+
+	//
+	//  Create dir if required
+	//
+	remote_cmd = fmt.Sprintf("mkdir -p \"/vmfs/volumes/%s/%s\"", virtual_disk_disk_store, virtual_disk_dir)
+	_, _ = runRemoteSshCommand(esxiConnInfo, remote_cmd, "create virtual disk dir")
+
+	remote_cmd = fmt.Sprintf("ls -d \"/vmfs/volumes/%s/%s\"", virtual_disk_disk_store, virtual_disk_dir)
+	_, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "validate dir exists")
+	if err != nil {
+		return "", fmt.Errorf("failed to create virtual disk directory: %s", err)
+	}
+
+	//
+	//  virtdisk_id is just the full path name.
+	//
+	virtdisk_dest_id = fmt.Sprintf("/vmfs/volumes/%s/%s/%s", virtual_disk_disk_store, virtual_disk_dir, virtual_disk_name)
+	virtdisk_clone_src_id = fmt.Sprintf("/vmfs/volumes/%s/%s/%s", virtual_disk_clone_src_disk_store, virtual_disk_clone_src_dir, virtual_disk_clone_src_name)
+
+	//
+	//  Validate if destination disk already exists
+	//
+	remote_cmd = fmt.Sprintf("ls -l \"%s\"", virtdisk_dest_id)
+	_, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "Destination disk does exist")
+	if err == nil {
+		log.Println("[virtualDiskCREATE] Destination disk does exist")
+		return virtdisk_dest_id, err
+	}
+
+	//
+	//  Validate if source disk exists
+	//
+	remote_cmd = fmt.Sprintf("ls -l \"%s\"", virtdisk_clone_src_id)
+	_, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "Source disk does not exist, cannot clone without source")
+	if err != nil {
+		log.Println("[virtualDiskCREATE] Source disk does not exist, cannot clone without source")
+		return virtdisk_clone_src_id, err
+	}
+
+	// make a copy
+	remote_cmd = fmt.Sprintf("/bin/cp \"%s\" \"%s\"", virtdisk_clone_src_id, virtdisk_dest_id)
+	_, err = runRemoteSshCommand(esxiConnInfo, remote_cmd, "clone disk")
+	if err != nil {
+		return "", errors.New("unable to clone disk")
+	}
+
+	// resize disk to given virtdisk_size
+
+	growVirtualDisk(c, virtdisk_dest_id, virtual_disk_size)
+
+	return virtdisk_dest_id, err
+}
+
 // Grow virtual Disk
-func growVirtualDisk(c *Config, virtdisk_id string, virtdisk_size string) (bool, error) {
+func growVirtualDisk(c *Config, virtdisk_id string, newDiskSize int) (bool, error) {
 	esxiConnInfo := getConnectionInfo(c)
 	log.Printf("[growVirtualDisk]\n")
 
 	var didGrowDisk bool
-	var newDiskSize int
 
 	_, _, _, currentDiskSize, _, err := virtualDiskREAD(c, virtdisk_id)
-
-	newDiskSize, _ = strconv.Atoi(virtdisk_size)
 
 	log.Printf("[growVirtualDisk] currentDiskSize:%d new_size:%d fullPATH: %s\n", currentDiskSize, newDiskSize, virtdisk_id)
 
